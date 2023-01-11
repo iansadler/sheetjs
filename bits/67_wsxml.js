@@ -203,11 +203,14 @@ function parse_ws_xml_cols(columns, cols) {
 		while(colm <= colM) columns[colm++] = dup(coll);
 	}
 }
-function write_ws_xml_cols(ws, cols)/*:string*/ {
+function write_ws_xml_cols(ws, cols, opts)/*:string*/ {
 	var o = ["<cols>"], col;
 	for(var i = 0; i != cols.length; ++i) {
 		if(!(col = cols[i])) continue;
-		o[o.length] = (writextag('col', null, col_obj_w(i, col)));
+		var cow = col_obj_w(i, col);
+		var os = col.z ? get_cell_style(opts.cellXfs, {z:col.z}, opts) : 0;
+		if(os !== 0) cow.style = os;
+		o[o.length] = (writextag('col', null, cow));
 	}
 	o[o.length] = "</cols>";
 	return o.join("");
@@ -571,7 +574,7 @@ function write_ws_xml(idx/*:number*/, opts, wb/*:Workbook*/, rels)/*:string*/ {
 		outlineLevelRow:opts.sheetFormat.outlineLevelRow||'7'
 	}));
 
-	if(ws['!cols'] != null && ws['!cols'].length > 0) o[o.length] = (write_ws_xml_cols(ws, ws['!cols']));
+	if(ws['!cols'] != null && ws['!cols'].length > 0) o[o.length] = (write_ws_xml_cols(ws, ws['!cols'], opts));
 
 	o[sidx = o.length] = '<sheetData/>';
 	ws['!links'] = [];
